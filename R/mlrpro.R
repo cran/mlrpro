@@ -24,18 +24,21 @@
 #' @importFrom stats filter lm median shapiro.test step
 #' @examples
 #' data(trees)
-#' Model.mlrpro <- mlrpro(Data = trees,Y = trees$Volume, Column_Y = 3, Alpha = 0.05)
+#' Model1 <- mlrpro(Data = trees,Y = trees$Volume, Column_Y = 3, Alpha = 0.05)
+#' ## or ##
+#' data(mtcars)
+#' Model2 <- mlrpro(Data = mtcars,Y = mtcars$mpg, Column_Y = 1 , Alpha = 0.01)
 #' @export mlrpro
 
 
 mlrpro <- function(Data,Y,Column_Y,Alpha) {
   Newdata <- Data
-  y <-  Y
   Newdata[Column_Y] <- NULL
-  fit <- suppressWarnings(step(lm(y~.,Newdata ,direct="both"),trace = 0))
+  y <- Y
+  Newdata <- data.frame(y,Newdata)
+  fit <- suppressWarnings(step(lm(y~.,data=Newdata ,direct="both"),trace = 0))
   sumfit <- summary(fit);#print(sumfit)
   Number_Beta <- c(length(sumfit$coefficients[,4]))
-  Model.of.step1 <- sumfit
   Decision <- 0
   for (i in 1 : Number_Beta) {
     x <- ifelse(sumfit$coefficients[i,4]<=Alpha,"Sig","NoSig")
@@ -58,7 +61,8 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
     if (RowNoSig > 0) {
       while(RowNoSig > 0) {
         Newdata1 <- Newdata[delete.Intercept]
-        fit1 <- lm(y~., Newdata1)
+        Newdata1 <- data.frame(y,Newdata1)
+        fit1 <- lm(y~., data=Newdata1)
         sumfit1 <- summary(fit1)
         Number_Beta1 <- c(length(sumfit1$coefficients[,4]))
 
@@ -102,7 +106,7 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
           writeLines("---------------------------\n Stepwise regression model \n---------------------------")
 
 
-          print(summary(fit1))
+          print(summary(fit))
 
           writeLines ("----------------------\n Checking Assumptions \n----------------------")
 
@@ -114,17 +118,17 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
           message("The multiple linear regression may not be appropriate for this data.")
 
-          plot(fit1,1)
-          plot(fit1,2)
+          plot(fit,1)
+          plot(fit,2)
           list(
-            coefficients = fit1$coefficients,
-            residuals = fit1$residuals,
-            fitted.values = fit1$fitted.values,
-            rank = fit1$rank,
-            df.residual = fit1$df.residual,
-            call = fit1$call,
-            terms = fit1$terms,
-            model = fit1$model
+            coefficients = fit$coefficients,
+            residuals = fit$residuals,
+            fitted.values = fit$fitted.values,
+            rank = fit$rank,
+            df.residual = fit$df.residual,
+            call = fit$call,
+            terms = fit$terms,
+            model = fit$model
           )
 
         } else if (Optimal.lambda != 1) {
@@ -141,7 +145,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y = log(y)"))
 
             y.prime <- log(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 0.25 && Optimal.lambda < 0.75 ) {
@@ -151,7 +157,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=sqrt(y)"))
 
             y.prime <- sqrt(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 1.5 && Optimal.lambda <= 2 ) {
@@ -161,7 +169,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=y^2"))
 
             y.prime <- (y^2)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.25 && Optimal.lambda > -0.75 ) {
@@ -171,7 +181,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/sqrt(y)"))
 
             y.prime <- 1/sqrt(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.75 && Optimal.lambda > -1.5 ) {
@@ -181,7 +193,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/y"))
 
             y.prime <- 1/y
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -1.5 && Optimal.lambda>= -2 ) {
@@ -191,7 +205,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/y^2"))
 
             y.prime <- 1/(y^2)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           }
@@ -213,11 +229,11 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                        "---------------------"))
 
 
-          ifelse(Normal$p.value <=Alpha,
+          ifelse(Normal$p.value <= Alpha,
                  print.noquote(" The errors do not follow a normal distribution."),
                  print.noquote(" The errors follow a normal distribution."))
 
-          ifelse( variance_p <=Alpha,
+          ifelse( variance_p <= Alpha,
                   print.noquote(" The variance of the errors is not constant (Heteroscedastic)."),
                   print.noquote(" The variance of the errors is constant (Homoscedastic)."))
           list(
@@ -277,17 +293,8 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
       variance <- leveneTest(error,group = error.Group)
       variance_p <- variance$`Pr(>F)`[1]
 
-
-      writeLines(c("-------------------------",
-                   "Stepwise regression model ",
-                   "-------------------------"))
-
-      print(summary(fit))
-
-
-
-      if (Normal$p.value <= Alpha || variance_p <=Alpha ) {
-
+      if (Normal$p.value <= Alpha || variance_p <= Alpha ) {
+        Newdata1 <- data.frame(y,Newdata1)
         Find.Lambda <- (boxcox(y~., data=Newdata1))
         Find.Lambda2 <- data.frame(Find.Lambda$x,Find.Lambda$y)
         Find.Lambda3 <- subset(Find.Lambda2,Find.Lambda$y==max(Find.Lambda$y))
@@ -303,7 +310,7 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                        "Stepwise regression model ",
                        "-------------------------"))
 
-          print(summary(fit1))
+          print(summary(fit))
 
           writeLines(c("----------------------",
                        "Checking  Assumptions",
@@ -318,20 +325,24 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
           message("The multiple linear regression may not be appropriate for this data.")
 
-          plot(fit1,1)
-          plot(fit1,2)
+          plot(fit,1)
+          plot(fit,2)
           list(
-            coefficients = fit1$coefficients,
-            residuals = fit1$residuals,
-            fitted.values = fit1$fitted.values,
-            rank = fit1$rank,
-            df.residual = fit1$df.residual,
-            call = fit1$call,
-            terms = fit1$terms,
-            model = fit1$model
+            coefficients = fit$coefficients,
+            residuals = fit$residuals,
+            fitted.values = fit$fitted.values,
+            rank = fit$rank,
+            df.residual = fit$df.residual,
+            call = fit$call,
+            terms = fit$terms,
+            model = fit$model
           )
 
         } else if (Optimal.lambda != 1) {
+
+          writeLines(c("--------------------------------------------------",
+                       "Regression model derived from data transformations",
+                       "--------------------------------------------------"))
 
 
           if (Optimal.lambda > -0.25 && Optimal.lambda < 0.25){
@@ -341,7 +352,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=log(y)"))
 
             y.prime <- log(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 0.25 && Optimal.lambda < 0.75 ) {
@@ -351,7 +364,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=sqrt(y)"))
 
             y.prime <- sqrt(y)
-            fit_end <- lm(y.prime~., Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~., data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 1.5 && Optimal.lambda <= 2 ) {
@@ -361,7 +376,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=y^2"))
 
             y.prime <- (y^2)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.25 && Optimal.lambda > -0.75 ) {
@@ -371,7 +388,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          " and transformation the dependent variable in the following : y=1/sqrt(y)"))
 
             y.prime <- 1/sqrt(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.75 && Optimal.lambda > -1.5 ) {
@@ -381,7 +400,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/y"))
 
             y.prime <- 1/y
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -1.5 && Optimal.lambda >= -2 ) {
@@ -391,7 +412,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          " and transformation the dependent variable in the following : y=1/y^2"))
 
             y.prime <- 1/(y^2)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           }
@@ -413,11 +436,11 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
 
 
-          ifelse(Normal$p.value <=Alpha,
+          ifelse(Normal$p.value <= Alpha,
                  print.noquote (" The errors do not follow a normal distribution."),
                  print.noquote (" The errors follow a normal distribution."))
 
-          ifelse( variance_p <=Alpha,
+          ifelse( variance_p <= Alpha,
                   print.noquote(" The variance of the errors is not constant (Heteroscedastic)."),
                   print.noquote(" The variance of the errors is constant (Homoscedastic)."))
           list(
@@ -440,6 +463,13 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
       }else if(Normal$p.value >= Alpha && variance_p >= Alpha ){
         plot(fit,1)
         plot(fit,2)
+
+        writeLines(c("-------------------------",
+                     "Stepwise regression model ",
+                     "-------------------------"))
+
+        print(summary(fit))
+
 
         writeLines(c ("----------------------",
                       "Checking  Assumptions",
@@ -469,13 +499,14 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
     if (RowNoSig > 0) {
       while(RowNoSig > 0) {
         Newdata1 <- Newdata[delete.Intercept]
-        fit1 <- lm(y~.-1,Newdata1)
+        Newdata1 <- data.frame(y,Newdata1)
+        fit1 <- lm(y~0+.,data=Newdata1)
         sumfit1 <- summary(fit1)
         Number_Beta1 <- c(length(sumfit1$coefficients[,4]))
 
         Decision1 <- 0
         for (i in 1 : Number_Beta1) {
-          x <- ifelse(sumfit1$coefficients[i,4]<=Alpha,"Sig","NoSig")
+          x <- ifelse(sumfit1$coefficients[i,4]<= Alpha,"Sig","NoSig")
           Decision1[i] <- x
         }
 
@@ -498,7 +529,7 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
       variance_p <- variance$`Pr(>F)`[1]
 
 
-      if (Normal$p.value <= Alpha || variance_p <=Alpha ) {
+      if (Normal$p.value <= Alpha || variance_p <= Alpha ) {
 
         Find.Lambda <- (boxcox(y~.,data=Newdata1))
         Find.Lambda2 <- data.frame(Find.Lambda$x,Find.Lambda$y)
@@ -554,7 +585,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y = log(y)"))
 
             y.prime <- log(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 0.25 && Optimal.lambda < 0.75 ) {
@@ -564,7 +597,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=sqrt(y)"))
 
             y.prime <- sqrt(y)
-            fit_end <- lm(y.prime~., Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data= Newdata1)
             sum_fit_end <- summary(fit_end)
 
 
@@ -575,7 +610,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=y^2"))
 
             y.prime <- (y^2)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.25 && Optimal.lambda > -0.75 ) {
@@ -585,7 +622,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/sqrt(y)"))
 
             y.prime <- 1/sqrt(y)
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.75 && Optimal.lambda > -1.5 ) {
@@ -595,7 +634,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/y"))
 
             y.prime <- 1/y
-            fit_end <- lm(y.prime~.,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data =  Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -1.5 && Optimal.lambda >= -2 ) {
@@ -605,7 +646,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          " and transformation the dependent variable in the following : y=1/y^2"))
 
             y.prime <- 1/(y^2)
-            fit_end <- lm(y.prime~., Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data =  Newdata1)
             sum_fit_end <- summary(fit_end)
 
           }
@@ -628,11 +671,11 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                         "---------------------"))
 
 
-          ifelse(Normal$p.value <=Alpha,
+          ifelse(Normal$p.value <= Alpha,
                  print.noquote(" The errors do not follow a normal distribution."),
                  print.noquote(" The errors follow a normal distribution."))
 
-          ifelse( variance_p <=Alpha,
+          ifelse( variance_p <= Alpha,
                   print.noquote(" The variance of the errors is not constant (Heteroscedastic)."),
                   print.noquote(" The variance of the errors is constant (Homoscedastic)."))
           list(
@@ -652,7 +695,8 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
 
 
-      }else if(Normal$p.value >= Alpha && variance_p >= Alpha ){
+      }else if(Normal$p.value >= Alpha &&
+               variance_p >= Alpha ){
 
 
         writeLines(c ("-------------------------",
@@ -693,9 +737,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
 
 
-      if (Normal$p.value <= Alpha || variance_p <=Alpha ) {
-
-        Find.Lambda <- (boxcox(y~.-1, Newdata1))
+      if (Normal$p.value <= Alpha || variance_p <= Alpha ) {
+        Newdata1 <- data.frame(y,Newdata1)
+        Find.Lambda <- (boxcox(y~., data = Newdata1))
         Find.Lambda2 <- data.frame(Find.Lambda$x,Find.Lambda$y)
         Find.Lambda3 <- subset(Find.Lambda2,Find.Lambda$y==max(Find.Lambda$y))
         Optimal.lambda <- Find.Lambda3$Find.Lambda.x
@@ -739,6 +783,10 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
 
         } else if (Optimal.lambda != 1) {
 
+          writeLines(c("--------------------------------------------------",
+                       "Regression model derived from data transformations",
+                       "--------------------------------------------------"))
+
           if (Optimal.lambda > -0.25 && Optimal.lambda < 0.25){
             lambda <- 0
 
@@ -746,7 +794,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=log(y)"))
 
             y.prime <- log(y)
-            fit_end <- lm(y.prime~.-1,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data = Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda >= 0.25 && Optimal.lambda < 0.75 ) {
@@ -756,7 +806,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          " and transformation the dependent variable in the following : y=sqrt(y)"))
 
             y.prime <- sqrt(y)
-            fit_end <- lm(y.prime~.-1,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
 
@@ -767,7 +819,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=y^2"))
 
             y.prime<- (y^2)
-            fit_end <- lm(y.prime~.-1,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda<= -0.25 && Optimal.lambda > -0.75 ) {
@@ -777,7 +831,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/sqrt(y)"))
 
             y.prime <- 1/sqrt(y)
-            fit_end <- lm(y.prime~.-1,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -0.75 && Optimal.lambda > -1.5 ) {
@@ -787,7 +843,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                           "and transformation the dependent variable in the following : y=1/y"))
 
             y.prime <- 1/y
-            fit_end <- lm(y.prime~.-1, Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+., data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           } else if (Optimal.lambda <= -1.5 && Optimal.lambda >= -2 ) {
@@ -797,7 +855,9 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                          "and transformation the dependent variable in the following : y=1/y^2"))
 
             y.prime <- 1/(y^2)
-            fit_end <- lm(y.prime~.-1,Newdata1)
+            Newdata1$y <- NULL
+            Newdata1 <- data.frame(y.prime,Newdata1)
+            fit_end <- lm(y.prime~0+.,data=Newdata1)
             sum_fit_end <- summary(fit_end)
 
           }
@@ -816,11 +876,11 @@ mlrpro <- function(Data,Y,Column_Y,Alpha) {
                        "---------------------"))
 
 
-          ifelse(Normal$p.value <=Alpha,
+          ifelse(Normal$p.value <= Alpha,
                  print.noquote(" The errors do not follow a normal distribution."),
                  print.noquote("The errors follow a normal distribution."))
 
-          ifelse( variance_p <=Alpha,
+          ifelse( variance_p <= Alpha,
                   print.noquote(" The variance of the errors is not constant (Heteroscedastic)."),
                   print.noquote (" The variance of the errors is constant (Homoscedastic)."))
           list(

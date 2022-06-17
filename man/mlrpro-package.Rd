@@ -34,5 +34,8 @@ check multiple linear regression assumptions and identify possible.
 }
 \examples{
 data(trees)
-Model.mlrpro <- mlrpro(Data = trees,Y = trees$Volume, Column_Y = 3, Alpha = 0.05)
+Model1 <- mlrpro(Data = trees,Y = trees$Volume, Column_Y = 3, Alpha = 0.05)
+## or ##
+data(mtcars)
+Model2 <- mlrpro(Data = mtcars,Y = mtcars$mpg, Column_Y = 1 , Alpha = 0.01)
 }

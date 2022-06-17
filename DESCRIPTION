@@ -1,7 +1,7 @@
 Package: mlrpro
 Type: Package
 Title: Stepwise Regression with Assumptions Checking
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person("Thidarat","Thongsri",role = c("aut", "cre"),
            email = "k.th.thidarat@gmail.com"),
@@ -16,9 +16,9 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 Language: en-US
 NeedsCompilation: no
-Packaged: 2022-06-01 14:48:48 UTC; PC
+Packaged: 2022-06-17 08:26:47 UTC; PC
 Author: Thidarat Thongsri [aut, cre],
   Klairung Samart [aut]
 Maintainer: Thidarat Thongsri <k.th.thidarat@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-06-03 07:20:02 UTC
+Date/Publication: 2022-06-17 08:40:02 UTC
