@@ -1,13 +1,11 @@
-6ce4a760d061553642bdf37919c5f10e *DESCRIPTION
+ce1688935493873190ea7aae11cdceba *DESCRIPTION
 812532ba36f3f109d685f74573831a25 *NAMESPACE
-7310c3bccf8d1fff3c385f65373f5583 *R/mlrpro.R
+75f89b43e7b8a0eabf19c780695985d3 *R/mlrpro.R
 00ca707badfb5aa71ef30301892fa0f9 *build/vignette.rds
-794261be675a61395ff71ad00d8414de *inst/WORDLIST
 a1ffc53505a579995f7676919ccd81a3 *inst/doc/Introduction.R
 72a224b5c0301cd9e1b636789012f66d *inst/doc/Introduction.Rmd
 c7165c1e3a462d22e5d7f42663bb5d91 *inst/doc/Introduction.html
 43ec040ec9928b0855dee37b79fa9a75 *man/mlrpro-package.Rd
-332173f20d20942c02019350ea4dcadc *tests/spelling.R
-cf569072da9f2346e46f147aa4693270 *tests/testthat.R
+af4a50491362898c1799239f1413860e *tests/testthat.R
 225e3812b897786befc574f805c96dc2 *tests/testthat/test-mlrpro.R
 72a224b5c0301cd9e1b636789012f66d *vignettes/Introduction.Rmd
