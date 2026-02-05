@@ -1,7 +1,7 @@
 Package: mlrpro
 Type: Package
 Title: Stepwise Regression with Assumptions Checking
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     c(person("Thidarat","Thongsri",role = c("aut", "cre"),
            email = "k.th.thidarat@gmail.com"),
@@ -9,15 +9,15 @@ Authors@R:
 Description: The stepwise regression with assumptions checking and the possible Box-Cox transformation.
 License: GPL-3
 Encoding: UTF-8
-Imports: car, dplyr, MASS
-RoxygenNote: 7.2.0
+Imports: car, dplyr, MASS, dgof
+RoxygenNote: 7.3.3
 Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-08-10 15:39:22 UTC; PC
+Packaged: 2026-02-05 01:38:15 UTC; ASUS Intel Laptop
 Author: Thidarat Thongsri [aut, cre],
   Klairung Samart [aut]
 Maintainer: Thidarat Thongsri <k.th.thidarat@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-08-10 16:10:09 UTC
+Date/Publication: 2026-02-05 10:00:02 UTC

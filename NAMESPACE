@@ -3,6 +3,7 @@
 export(mlrpro)
 importFrom(MASS,boxcox)
 importFrom(car,leveneTest)
+importFrom(dgof,ks.test)
 importFrom(dplyr,"%>%")
 importFrom(dplyr,mutate)
 importFrom(stats,filter)
